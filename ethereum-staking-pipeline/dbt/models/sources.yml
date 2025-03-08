@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: snowflake
+    database: STAKING_DB
+    schema: PUBLIC
+    tables:
+      - name: ETH_STAKING_TRANSACTIONS
+      - name: ETH_STAKING_DAILY_STATS

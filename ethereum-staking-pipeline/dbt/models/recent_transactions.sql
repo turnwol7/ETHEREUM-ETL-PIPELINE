@@ -1,0 +1,10 @@
+-- Get the most recent transactions
+SELECT
+    TRANSACTION_HASH,
+    SENDER_ADDRESS,
+    AMOUNT_ETH,
+    TIMESTAMP,
+    GAS_COST_ETH
+FROM {{ source('snowflake', 'ETH_STAKING_TRANSACTIONS') }}
+ORDER BY TIMESTAMP DESC
+LIMIT 10

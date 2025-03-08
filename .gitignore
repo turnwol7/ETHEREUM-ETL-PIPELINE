@@ -1,2 +1,52 @@
-/venv
+# Environment variables
 .env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# dbt
+target/
+dbt_packages/
+logs/
+
+# Node.js
+node_modules/
+.next/
+out/
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dagster
+dagster_home/
+
+# Snowflake
+.snowflake/
+
+# Data files
+*.csv
+*.json
