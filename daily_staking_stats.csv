@@ -1,0 +1,3 @@
+date,num_transactions,total_eth_staked,avg_stake_size,min_stake_size,max_stake_size,total_gas_cost,avg_gas_cost,num_standard_stakes,pct_standard_stakes
+2025-03-08,25,800.0,32.0,32.0,32.0,0.002172406048000143,8.689624192000572e-05,25,100.0
+2025-03-07,75,2400.0,32.0,32.0,32.0,0.006428368679029591,8.57115823870612e-05,75,100.0

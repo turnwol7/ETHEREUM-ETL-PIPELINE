@@ -1,0 +1,6 @@
+staking_data_pipeline/
+│── .env              # Store API keys & credentials
+│── fetch_data.py     # Fetch transactions from Etherscan
+│── transform_data.py # Process & clean the data
+│── load_snowflake.py # Upload to Snowflake
+│── requirements.txt  # Dependencies
