@@ -15,20 +15,24 @@ fi
 echo "📦 Installing required dependencies..."
 pip install "snowflake-connector-python[pandas]"
 
+# Clean up duplicate CSV files in the ETL directory
+echo "🧹 Cleaning up duplicate CSV files..."
+python ethereum-staking-pipeline/etl/cleanup_duplicates.py
+
 # Run ETL scripts
 echo "📥 Fetching data from Etherscan..."
 python ethereum-staking-pipeline/etl/fetch_data.py
 
 # Show the first few lines of the CSV to verify
 echo "📄 Verifying fetched data..."
-head -n 3 ethereum-staking-pipeline/etl/staking_transactions.csv
+head -n 3 staking_transactions.csv
 
 echo "🔄 Transforming data..."
 python ethereum-staking-pipeline/etl/transform_data.py
 
 # Show the first few lines of the transformed CSV
 echo "📄 Verifying transformed data..."
-head -n 3 ethereum-staking-pipeline/etl/transformed_staking_data.csv
+head -n 3 transformed_staking_data.csv
 
 echo "📤 Loading data to Snowflake..."
 python ethereum-staking-pipeline/etl/load_snowflake.py

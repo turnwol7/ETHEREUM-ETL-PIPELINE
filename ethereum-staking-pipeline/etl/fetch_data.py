@@ -60,16 +60,24 @@ def save_to_csv(transactions, filename="staking_transactions.csv"):
         print("No transactions to save")
         return
     
+    # Save to both the current directory and the root directory
     df = pd.DataFrame(transactions)
+    
+    # Save to current directory
     df.to_csv(filename, index=False)
     print(f"Saved {len(df)} transactions to {filename}")
+    
+    # Save to root directory (two levels up)
+    root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), filename)
+    df.to_csv(root_path, index=False)
+    print(f"Saved {len(df)} transactions to root directory: {root_path}")
 
 def main():
     """Main function to fetch and save staking data"""
     print("Fetching recent ETH2 staking transactions...")
     
-    # Fetch 500 transactions instead of 100 to ensure we have a good history
-    transactions = fetch_staking_data(page=1, limit=500, sort_order="desc")
+    # Fetch only 10 transactions instead of 500
+    transactions = fetch_staking_data(page=1, limit=10, sort_order="desc")
     
     if transactions:
         # Preview first transaction

@@ -70,6 +70,16 @@ def create_tables(conn):
         )
         """)
         
+        # Create table for pipeline runs
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS PIPELINE_RUNS (
+            RUN_ID NUMBER IDENTITY(1,1) PRIMARY KEY,
+            RUN_TIMESTAMP TIMESTAMP_NTZ,
+            STATUS VARCHAR(50),
+            DETAILS VARCHAR(1000)
+        )
+        """)
+        
         cursor.close()
         print("Tables created successfully!")
         return True
@@ -77,13 +87,44 @@ def create_tables(conn):
         print(f"Error creating tables: {e}")
         return False
 
+def truncate_tables(conn):
+    """Truncate existing tables to ensure clean data load"""
+    if not conn:
+        return False
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Truncate transaction table
+        cursor.execute("TRUNCATE TABLE IF EXISTS ETH_STAKING_TRANSACTIONS")
+        
+        # Truncate daily stats table
+        cursor.execute("TRUNCATE TABLE IF EXISTS ETH_STAKING_DAILY_STATS")
+        
+        # Truncate pipeline runs table if it exists
+        cursor.execute("TRUNCATE TABLE IF EXISTS PIPELINE_RUNS")
+        
+        print("Successfully truncated existing tables")
+        return True
+    except Exception as e:
+        print(f"Error truncating tables: {e}")
+        return False
+
 def load_data_from_csv(filename):
     """Load data from CSV file"""
-    if not os.path.exists(filename):
-        print(f"Error: File {filename} not found")
-        return pd.DataFrame()
+    # First check if file exists in the current directory
+    if os.path.exists(filename):
+        print(f"Loading {filename} from current directory")
+        return pd.read_csv(filename)
     
-    return pd.read_csv(filename)
+    # Then check if file exists in the root directory (two levels up)
+    root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), filename)
+    if os.path.exists(root_path):
+        print(f"Loading {filename} from root directory: {root_path}")
+        return pd.read_csv(root_path)
+    
+    print(f"Error: File {filename} not found in either current or root directory")
+    return pd.DataFrame()
 
 def upload_transactions_to_snowflake(conn, df):
     """Upload transformed transaction data to Snowflake"""
@@ -200,6 +241,30 @@ def upload_daily_stats_to_snowflake(conn, df):
         print(f"Error uploading daily statistics: {e}")
         return False
 
+def record_pipeline_run(conn, status="SUCCESS", details=None):
+    """Record a pipeline run in the PIPELINE_RUNS table"""
+    if not conn:
+        return False
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Get the current timestamp
+        cursor.execute("SELECT CURRENT_TIMESTAMP()")
+        timestamp = cursor.fetchone()[0]
+        
+        # Insert pipeline run record
+        cursor.execute(
+            "INSERT INTO PIPELINE_RUNS (RUN_TIMESTAMP, STATUS, DETAILS) VALUES (%s, %s, %s)",
+            (timestamp, status, details or "ETL pipeline run completed")
+        )
+        
+        print(f"Recorded pipeline run with status: {status}")
+        return True
+    except Exception as e:
+        print(f"Error recording pipeline run: {e}")
+        return False
+
 def main():
     """Main function to load data into Snowflake"""
     # Check for required environment variables
@@ -223,6 +288,10 @@ def main():
         conn.close()
         return
     
+    # Truncate tables before loading new data
+    if not truncate_tables(conn):
+        print("Warning: Failed to truncate tables. Proceeding with data load anyway.")
+    
     # Load transformed transaction data
     print("Loading transformed transaction data...")
     transactions_df = load_data_from_csv("transformed_staking_data.csv")
@@ -244,6 +313,9 @@ def main():
         # Upload daily statistics to Snowflake
         print("Uploading daily statistics to Snowflake...")
         upload_daily_stats_to_snowflake(conn, stats_df)
+    
+    # Record the pipeline run
+    record_pipeline_run(conn)
     
     # Close connection
     conn.close()

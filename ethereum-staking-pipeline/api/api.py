@@ -133,6 +133,67 @@ def get_pipeline_status():
     finally:
         conn.close()
 
+@app.get("/metrics/staking")
+def get_staking_metrics():
+    conn = get_snowflake_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT 
+                TO_VARCHAR(TOTAL_ETH_LAST_24H) as TOTAL_ETH_LAST_24H,
+                TO_VARCHAR(TOTAL_TXS_LAST_24H) as TOTAL_TXS_LAST_24H,
+                TO_VARCHAR(AVG_ETH_LAST_24H) as AVG_ETH_LAST_24H,
+                TO_VARCHAR(TOTAL_ETH_LAST_7D) as TOTAL_ETH_LAST_7D,
+                TO_VARCHAR(TOTAL_TXS_LAST_7D) as TOTAL_TXS_LAST_7D,
+                TO_VARCHAR(AVG_ETH_LAST_7D) as AVG_ETH_LAST_7D,
+                TO_VARCHAR(TOTAL_ETH_ALL_TIME) as TOTAL_ETH_ALL_TIME,
+                TO_VARCHAR(TOTAL_TXS_ALL_TIME) as TOTAL_TXS_ALL_TIME,
+                TO_VARCHAR(AVG_ETH_ALL_TIME) as AVG_ETH_ALL_TIME,
+                TO_VARCHAR(CALCULATED_AT) as CALCULATED_AT
+            FROM staking_metrics
+        """)
+        
+        columns = [col[0] for col in cursor.description]
+        result = cursor.fetchone()
+        
+        if result:
+            metrics = dict(zip(columns, result))
+        else:
+            # Return default values if no data is found
+            metrics = {
+                "TOTAL_ETH_LAST_24H": "0",
+                "TOTAL_TXS_LAST_24H": "0",
+                "AVG_ETH_LAST_24H": "0",
+                "TOTAL_ETH_LAST_7D": "0",
+                "TOTAL_TXS_LAST_7D": "0",
+                "AVG_ETH_LAST_7D": "0",
+                "TOTAL_ETH_ALL_TIME": "0",
+                "TOTAL_TXS_ALL_TIME": "0",
+                "AVG_ETH_ALL_TIME": "0",
+                "CALCULATED_AT": str(datetime.now())
+            }
+            
+        return {"metrics": metrics}
+    except Exception as e:
+        print(f"Error fetching staking metrics: {e}")
+        # Return default values in case of error
+        return {
+            "metrics": {
+                "TOTAL_ETH_LAST_24H": "0",
+                "TOTAL_TXS_LAST_24H": "0",
+                "AVG_ETH_LAST_24H": "0",
+                "TOTAL_ETH_LAST_7D": "0",
+                "TOTAL_TXS_LAST_7D": "0",
+                "AVG_ETH_LAST_7D": "0",
+                "TOTAL_ETH_ALL_TIME": "0",
+                "TOTAL_TXS_ALL_TIME": "0",
+                "AVG_ETH_ALL_TIME": "0",
+                "CALCULATED_AT": str(datetime.now())
+            }
+        }
+    finally:
+        conn.close()
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

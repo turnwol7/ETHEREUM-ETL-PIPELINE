@@ -4,12 +4,19 @@ from datetime import datetime
 
 def load_raw_data(filename="staking_transactions.csv"):
     """Load raw staking transactions from CSV file"""
-    if not os.path.exists(filename):
-        print(f"Error: File {filename} not found")
-        return None
+    # First check if file exists in the current directory
+    if os.path.exists(filename):
+        print(f"Loading data from {filename}...")
+        return pd.read_csv(filename)
     
-    print(f"Loading data from {filename}...")
-    return pd.read_csv(filename)
+    # Then check if file exists in the root directory (two levels up)
+    root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), filename)
+    if os.path.exists(root_path):
+        print(f"Loading data from root directory: {root_path}...")
+        return pd.read_csv(root_path)
+    
+    print(f"Error: File {filename} not found in either current or root directory")
+    return None
 
 def transform_data(df):
     """Transform and clean the staking transaction data"""
@@ -120,22 +127,34 @@ def create_daily_summary(df):
     return daily_stats
 
 def save_transformed_data(df, filename="transformed_staking_data.csv"):
-    """Save transformed data to CSV"""
+    """Save transformed data to CSV file"""
     if df is None or df.empty:
         print("No data to save")
         return
-    
+        
+    # Save to current directory
     df.to_csv(filename, index=False)
     print(f"Saved transformed data with {len(df)} rows to {filename}")
+    
+    # Save to root directory (two levels up)
+    root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), filename)
+    df.to_csv(root_path, index=False)
+    print(f"Saved transformed data with {len(df)} rows to root directory: {root_path}")
 
 def save_daily_summary(df, filename="daily_staking_stats.csv"):
-    """Save daily summary to CSV"""
+    """Save daily summary to CSV file"""
     if df is None or df.empty:
         print("No daily summary to save")
         return
-    
+        
+    # Save to current directory
     df.to_csv(filename, index=False)
     print(f"Saved daily summary with {len(df)} rows to {filename}")
+    
+    # Save to root directory (two levels up)
+    root_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), filename)
+    df.to_csv(root_path, index=False)
+    print(f"Saved daily summary with {len(df)} rows to root directory: {root_path}")
 
 def main():
     """Main function to transform staking data"""
