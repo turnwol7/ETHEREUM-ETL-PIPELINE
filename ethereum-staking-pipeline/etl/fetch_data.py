@@ -11,7 +11,7 @@ API_KEY = os.getenv("ETHERSCAN_API_KEY")
 # Ethereum 2.0 Deposit Contract - This is where all ETH staking happens
 ETH2_DEPOSIT_CONTRACT = "0x00000000219ab540356cBB839Cbe05303d7705Fa"
 
-def fetch_staking_data(page=1, limit=100, sort_order="desc"):
+def fetch_staking_data(page=1, limit=10, sort_order="desc"):
     """Fetch staking transactions from the ETH2 deposit contract"""
     url = "https://api.etherscan.io/api"
     params = {
@@ -76,8 +76,8 @@ def main():
     """Main function to fetch and save staking data"""
     print("Fetching recent ETH2 staking transactions...")
     
-    # Fetch only 10 transactions instead of 500
-    transactions = fetch_staking_data(page=1, limit=10, sort_order="desc")
+    # Fetch only 10 transactions by default
+    transactions = fetch_staking_data()
     
     if transactions:
         # Preview first transaction
