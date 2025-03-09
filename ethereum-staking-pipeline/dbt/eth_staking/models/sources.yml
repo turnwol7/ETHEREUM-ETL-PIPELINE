@@ -6,4 +6,3 @@ sources:
     schema: PUBLIC
     tables:
       - name: ETH_STAKING_TRANSACTIONS
-      - name: ETH_STAKING_DAILY_STATS

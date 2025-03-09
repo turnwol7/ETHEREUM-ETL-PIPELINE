@@ -3,107 +3,135 @@ from fastapi.middleware.cors import CORSMiddleware
 import snowflake.connector
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 import json
-from datetime import datetime, timedelta
 
-# Load environment variables
 load_dotenv()
 
 app = FastAPI()
 
-# Add CORS middleware to allow requests from your frontend
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For production, specify your Vercel domain
+    allow_origins=["*"],  # For production, specify exact origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 def get_snowflake_connection():
-    """Get a connection to Snowflake"""
-    return snowflake.connector.connect(
-        user=os.getenv("SNOWFLAKE_USER"),
-        password=os.getenv("SNOWFLAKE_PASSWORD"),
-        account=os.getenv("SNOWFLAKE_ACCOUNT"),
-        warehouse=os.getenv("SNOWFLAKE_WAREHOUSE"),
-        database=os.getenv("SNOWFLAKE_DATABASE"),
-        schema=os.getenv("SNOWFLAKE_SCHEMA"),
-        role=os.getenv("SNOWFLAKE_ROLE")
-    )
+    try:
+        conn = snowflake.connector.connect(
+            user=os.getenv('SNOWFLAKE_USER'),
+            password=os.getenv('SNOWFLAKE_PASSWORD'),
+            account=os.getenv('SNOWFLAKE_ACCOUNT'),
+            warehouse=os.getenv('SNOWFLAKE_WAREHOUSE'),
+            database=os.getenv('SNOWFLAKE_DATABASE'),
+            schema=os.getenv('SNOWFLAKE_SCHEMA')
+        )
+        return conn
+    except Exception as e:
+        print(f"Error connecting to Snowflake: {e}")
+        raise HTTPException(status_code=500, detail=f"Database connection error: {str(e)}")
+
+def safe_serialize(value):
+    """Handle serialization of large numbers and other problematic types"""
+    if isinstance(value, (int, float)) and (value > 9007199254740991 or value < -9007199254740991):
+        return str(value)
+    return value
 
 @app.get("/")
 def read_root():
     return {"message": "Ethereum Staking API"}
 
-@app.get("/recent-transactions")
+@app.get("/transactions/recent")
 def get_recent_transactions():
-    """Get the 10 most recent transactions"""
+    conn = get_snowflake_connection()
     try:
-        conn = get_snowflake_connection()
         cursor = conn.cursor()
+        # Cast problematic columns to strings in the SQL query
+        cursor.execute("""
+            SELECT 
+                TO_VARCHAR(TRANSACTION_HASH) as TRANSACTION_HASH,
+                TO_VARCHAR(SENDER_ADDRESS) as SENDER_ADDRESS,
+                TO_VARCHAR(AMOUNT_ETH) as AMOUNT_ETH,
+                TO_VARCHAR(TIMESTAMP) as TIMESTAMP,
+                TO_VARCHAR(GAS_COST_ETH) as GAS_COST_ETH
+            FROM recent_transactions
+        """)
         
-        # Query the dbt model for recent transactions
-        cursor.execute("SELECT * FROM RECENT_TRANSACTIONS")
-        
-        # Convert to list of dictionaries
         columns = [col[0] for col in cursor.description]
         transactions = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        
-        cursor.close()
-        conn.close()
-        
         return {"transactions": transactions}
-    
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Error fetching recent transactions: {e}")
+        raise HTTPException(status_code=500, detail=f"Error fetching recent transactions: {str(e)}")
+    finally:
+        conn.close()
 
-@app.get("/hourly-stats")
+@app.get("/stats/hourly")
 def get_hourly_stats():
-    """Get hourly statistics"""
+    conn = get_snowflake_connection()
     try:
-        conn = get_snowflake_connection()
         cursor = conn.cursor()
+        # Cast problematic columns to strings in the SQL query
+        cursor.execute("""
+            SELECT 
+                TO_VARCHAR(HOUR) as HOUR,
+                TO_VARCHAR(NUM_TRANSACTIONS) as NUM_TRANSACTIONS,
+                TO_VARCHAR(TOTAL_ETH) as TOTAL_ETH,
+                TO_VARCHAR(AVG_ETH) as AVG_ETH,
+                TO_VARCHAR(TOTAL_GAS_COST) as TOTAL_GAS_COST
+            FROM hourly_stats
+            LIMIT 24
+        """)
         
-        # Query the dbt model for hourly stats
-        cursor.execute("SELECT * FROM HOURLY_STATS LIMIT 24")  # Last 24 hours
-        
-        # Convert to list of dictionaries
         columns = [col[0] for col in cursor.description]
         stats = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        
-        cursor.close()
+        return {"stats": stats}
+    except Exception as e:
+        print(f"Error fetching hourly stats: {e}")
+        raise HTTPException(status_code=500, detail=f"Error fetching hourly stats: {str(e)}")
+    finally:
         conn.close()
-        
-        return {"hourly_stats": stats}
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/pipeline-status")
+@app.get("/pipeline/status")
 def get_pipeline_status():
-    """Get the status of the data pipeline"""
+    conn = get_snowflake_connection()
     try:
-        # Read the metadata file created by Dagster
-        metadata_path = "../etl/extract_metadata.json"
-        if os.path.exists(metadata_path):
-            with open(metadata_path, "r") as f:
-                metadata = json.load(f)
-                
-            # Calculate how long ago the pipeline ran
-            last_run = datetime.fromisoformat(metadata["timestamp"])
-            time_since_run = datetime.now() - last_run
-            
-            return {
-                "last_run": metadata["timestamp"],
-                "status": metadata["status"],
-                "minutes_since_last_run": time_since_run.total_seconds() / 60
-            }
-        else:
-            return {"status": "unknown", "message": "No pipeline metadata found"}
-    
+        cursor = conn.cursor()
+        # Use a simpler query that doesn't rely on timestamp formatting
+        cursor.execute("""
+            SELECT 
+                TO_VARCHAR(COUNT(*)) as total_transactions,
+                TO_VARCHAR(MIN(TIMESTAMP)) as first_transaction,
+                TO_VARCHAR(MAX(TIMESTAMP)) as last_transaction
+            FROM ETH_STAKING_TRANSACTIONS
+        """)
+        
+        result = cursor.fetchone()
+        columns = [col[0] for col in cursor.description]
+        data = dict(zip(columns, result))
+        
+        return {
+            "status": "active",
+            "total_transactions": data.get("TOTAL_TRANSACTIONS", "0"),
+            "first_transaction": data.get("FIRST_TRANSACTION", "N/A"),
+            "last_transaction": data.get("LAST_TRANSACTION", "N/A"),
+            "last_run_formatted": "Data available"
+        }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Error fetching pipeline status: {e}")
+        # Return a fallback status if there's an error
+        return {
+            "status": "active",
+            "total_transactions": "N/A",
+            "first_transaction": "N/A",
+            "last_transaction": "N/A",
+            "last_run_formatted": "Error retrieving data"
+        }
+    finally:
+        conn.close()
 
 if __name__ == "__main__":
     import uvicorn

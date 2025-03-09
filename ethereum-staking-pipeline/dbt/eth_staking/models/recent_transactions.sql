@@ -1,4 +1,3 @@
--- Get the most recent transactions
 SELECT
     TRANSACTION_HASH,
     SENDER_ADDRESS,
