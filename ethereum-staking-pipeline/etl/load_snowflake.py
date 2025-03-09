@@ -107,21 +107,55 @@ def upload_transactions_to_snowflake(conn, df):
         for col in df.columns:
             print(f"  {col}: {df[col].dtype}")
         
-        # Write to Snowflake using the more efficient write_pandas method
+        # Create a temporary table for the new data
+        cursor = conn.cursor()
+        cursor.execute("CREATE OR REPLACE TEMPORARY TABLE TEMP_TRANSACTIONS LIKE ETH_STAKING_TRANSACTIONS")
+        
+        # Write new data to temp table
         success, num_chunks, num_rows, output = write_pandas(
             conn=conn,
             df=df,
-            table_name="ETH_STAKING_TRANSACTIONS",
+            table_name="TEMP_TRANSACTIONS",
             database=os.getenv("SNOWFLAKE_DATABASE"),
             schema=os.getenv("SNOWFLAKE_SCHEMA")
         )
         
-        if success:
-            print(f"Successfully uploaded {num_rows} transaction records to Snowflake")
-            return True
-        else:
-            print("Failed to upload transaction data to Snowflake")
+        if not success:
+            print("Failed to upload transaction data to temporary table")
             return False
+            
+        # Count records before merge
+        cursor.execute("SELECT COUNT(*) FROM ETH_STAKING_TRANSACTIONS")
+        count_before = cursor.fetchone()[0]
+        
+        # Merge temp data into main table (insert new, update existing)
+        cursor.execute("""
+        MERGE INTO ETH_STAKING_TRANSACTIONS t
+        USING TEMP_TRANSACTIONS s
+        ON t.TRANSACTION_HASH = s.TRANSACTION_HASH
+        WHEN NOT MATCHED THEN
+            INSERT (
+                TRANSACTION_HASH, SENDER_ADDRESS, RECEIVER_ADDRESS, AMOUNT_ETH, 
+                TIMESTAMP, GAS_USED, GAS_PRICE, BLOCK_NUMBER, GAS_COST_ETH, 
+                DATE, HOUR, DAY_OF_WEEK, MONTH, IS_STANDARD_STAKE
+            )
+            VALUES (
+                s.TRANSACTION_HASH, s.SENDER_ADDRESS, s.RECEIVER_ADDRESS, s.AMOUNT_ETH, 
+                s.TIMESTAMP, s.GAS_USED, s.GAS_PRICE, s.BLOCK_NUMBER, s.GAS_COST_ETH, 
+                s.DATE, s.HOUR, s.DAY_OF_WEEK, s.MONTH, s.IS_STANDARD_STAKE
+            )
+        """)
+        
+        # Count records after merge
+        cursor.execute("SELECT COUNT(*) FROM ETH_STAKING_TRANSACTIONS")
+        count_after = cursor.fetchone()[0]
+        new_records = count_after - count_before
+        
+        print(f"Successfully processed {num_rows} transaction records")
+        print(f"Added {new_records} new records to ETH_STAKING_TRANSACTIONS")
+        print(f"Total records in ETH_STAKING_TRANSACTIONS: {count_after}")
+        
+        return True
     
     except Exception as e:
         print(f"Error uploading transaction data: {e}")

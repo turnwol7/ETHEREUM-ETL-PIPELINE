@@ -67,11 +67,13 @@ def save_to_csv(transactions, filename="staking_transactions.csv"):
 def main():
     """Main function to fetch and save staking data"""
     print("Fetching recent ETH2 staking transactions...")
-    transactions = fetch_staking_data(page=1, limit=100, sort_order="desc")
+    
+    # Fetch 500 transactions instead of 100 to ensure we have a good history
+    transactions = fetch_staking_data(page=1, limit=500, sort_order="desc")
     
     if transactions:
         # Preview first transaction
-        print("\Latest transaction:")
+        print("\nLatest transaction:")
         formatted_tx = format_transaction_preview(transactions[0])
         for key, value in formatted_tx.items():
             print(f"{key}: {value}")
@@ -84,6 +86,12 @@ def main():
         
         # Save to CSV for the transform step
         save_to_csv(transactions)
+        
+        # Print the oldest transaction in this batch for reference
+        print("\nOldest transaction in this batch:")
+        oldest_tx = format_transaction_preview(transactions[-1])
+        for key, value in oldest_tx.items():
+            print(f"{key}: {value}")
 
 if __name__ == "__main__":
     main()
