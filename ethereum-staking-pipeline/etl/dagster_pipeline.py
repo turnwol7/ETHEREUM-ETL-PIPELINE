@@ -1,4 +1,4 @@
-from dagster import asset, AssetExecutionContext, Definitions, ScheduleDefinition
+from dagster import asset, AssetExecutionContext, Definitions, ScheduleDefinition, define_asset_job
 import os
 import subprocess
 from dotenv import load_dotenv
@@ -25,7 +25,14 @@ def extract_ethereum_data(context: AssetExecutionContext):
 def transform_ethereum_data(context: AssetExecutionContext, extract_ethereum_data):
     """Transform the raw transaction data"""
     context.log.info("Transforming transaction data")
-    transformed_data = transform_data(extract_ethereum_data)
+    
+    # Convert the list to a DataFrame first
+    import pandas as pd
+    df = pd.DataFrame(extract_ethereum_data)
+    
+    # Then pass the DataFrame to transform_data
+    transformed_data = transform_data(df)
+    
     context.log.info("Transformation complete")
     return transformed_data
 
@@ -47,8 +54,8 @@ def load_to_snowflake_db(context: AssetExecutionContext, transform_ethereum_data
         schema=os.getenv('SNOWFLAKE_SCHEMA')
     )
     cursor = conn.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS pipeline_runs (run_id INT AUTOINCREMENT, run_time TIMESTAMP_NTZ)")
-    cursor.execute("INSERT INTO pipeline_runs (run_time) VALUES (CURRENT_TIMESTAMP())")
+    cursor.execute("CREATE TABLE IF NOT EXISTS pipeline_runs (run_id INT AUTOINCREMENT, run_time TIMESTAMP_NTZ, records_processed INT)")
+    cursor.execute("INSERT INTO pipeline_runs (run_time, records_processed) VALUES (CURRENT_TIMESTAMP(), %s)", (len(transform_ethereum_data),))
     conn.close()
     
     return "Data loaded successfully"
@@ -57,28 +64,50 @@ def load_to_snowflake_db(context: AssetExecutionContext, transform_ethereum_data
 def run_dbt_models(context: AssetExecutionContext):
     """Run dbt models to transform data in Snowflake"""
     context.log.info("Running dbt models")
-    dbt_project_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dbt")
+    
+    # Update path to point to the eth_staking subdirectory
+    dbt_project_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dbt", "eth_staking")
+    
+    # Debug the path
+    context.log.info(f"dbt project directory: {dbt_project_dir}")
+    
+    # Make sure to set the DBT_PROFILES_DIR environment variable
+    env = os.environ.copy()
+    env["DBT_PROFILES_DIR"] = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dbt")
+    
     result = subprocess.run(
         ["dbt", "run"], 
         cwd=dbt_project_dir,
         capture_output=True,
-        text=True
+        text=True,
+        env=env  # Use the modified environment
     )
+    
     context.log.info(f"dbt output: {result.stdout}")
     if result.returncode != 0:
         context.log.error(f"dbt error: {result.stderr}")
         raise Exception("dbt run failed")
+    
     return "dbt models run successfully"
 
-# Define a schedule to run the pipeline hourly
-hourly_schedule = ScheduleDefinition(
-    job_name="ethereum_staking_etl",
-    cron_schedule="0 * * * *",  # Run at the start of every hour
+# Create a job from your assets
+ethereum_staking_etl = define_asset_job(
+    name="ethereum_staking_etl",
+    selection="*",  # This selects all assets
+    description="Job to run the entire Ethereum staking ETL pipeline"
+)
+
+# Define a schedule to run the pipeline every minute for testing
+test_schedule = ScheduleDefinition(
+    name="ethereum_staking_etl_schedule",
+    job=ethereum_staking_etl,
+    cron_schedule="*/5 * * * *",  # Run every 5 minutes
     execution_timezone="UTC",
 )
 
 # Define the Dagster job
 defs = Definitions(
     assets=[extract_ethereum_data, transform_ethereum_data, load_to_snowflake_db, run_dbt_models],
-    schedules=[hourly_schedule]
+    jobs=[ethereum_staking_etl],  # Include the job in your definitions
+    schedules=[test_schedule]
 )

@@ -65,7 +65,18 @@ export default function Home() {
       }
     };
 
+    // Initial data fetch
     fetchData();
+    
+    // Set up auto-refresh every 60 seconds
+    const intervalId = setInterval(() => {
+      fetchData();
+    }, 60000);
+    
+    // Clean up interval on component unmount
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   // Add WebSocket support for real-time updates
