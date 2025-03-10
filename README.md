@@ -1,6 +1,11 @@
 # Ethereum Staking Pipeline
 
-A complete data pipeline for Ethereum staking data using modern data stack technologies.
+A complete data pipeline for Ethereum staking data using modern data stack technologies.  
+
+## Ethereum Beacon Chain Contract Address  
+
+This is the contract that we are pulling data from  
+```0x00000000219ab540356cBB839Cbe05303d7705Fa```  
 
 ## Architecture
 
@@ -15,7 +20,12 @@ A complete data pipeline for Ethereum staking data using modern data stack techn
 - `/etl`: ETL pipeline code and Dagster orchestration
 - `/dbt`: dbt models for data transformation in Snowflake
 - `/api`: FastAPI backend for serving data
-- `/frontend`: Next.js frontend for visualization
+- `/frontend`: Next.js frontend for visualization  
+
+## Services
+
+Etherscan API  
+Snowflake Account  
 
 ## Usefull commands to get running  
 
