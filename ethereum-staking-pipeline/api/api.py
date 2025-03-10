@@ -110,43 +110,6 @@ def get_hourly_stats():
     finally:
         conn.close()
 
-@app.get("/pipeline/status")
-def get_pipeline_status():
-    conn = get_snowflake_connection()
-    try:
-        cursor = conn.cursor()
-        # Use a simpler query that doesn't rely on timestamp formatting
-        cursor.execute("""
-            SELECT 
-                TO_VARCHAR(COUNT(*)) as total_transactions,
-                TO_VARCHAR(MIN(TIMESTAMP)) as first_transaction,
-                TO_VARCHAR(MAX(TIMESTAMP)) as last_transaction
-            FROM ETH_STAKING_TRANSACTIONS
-        """)
-        
-        result = cursor.fetchone()
-        columns = [col[0] for col in cursor.description]
-        data = dict(zip(columns, result))
-        
-        return {
-            "status": "active",
-            "total_transactions": data.get("TOTAL_TRANSACTIONS", "0"),
-            "first_transaction": data.get("FIRST_TRANSACTION", "N/A"),
-            "last_transaction": data.get("LAST_TRANSACTION", "N/A"),
-            "last_run_formatted": "Data available"
-        }
-    except Exception as e:
-        print(f"Error fetching pipeline status: {e}")
-        # Return a fallback status if there's an error
-        return {
-            "status": "active",
-            "total_transactions": "N/A",
-            "first_transaction": "N/A",
-            "last_transaction": "N/A",
-            "last_run_formatted": "Data available"
-        }
-    finally:
-        conn.close()
 
 @app.get("/metrics/staking")
 def get_staking_metrics():

@@ -29,18 +29,8 @@ interface StakingMetrics {
   CALCULATED_AT: string;
 }
 
-// Updated to match the current API response
-interface PipelineStatus {
-  status: string;
-  total_transactions: string;
-  first_transaction: string;
-  last_transaction: string;
-  last_run_formatted: string;
-}
-
 export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [pipelineStatus, setPipelineStatus] = useState<PipelineStatus | null>(null);
   const [stakingMetrics, setStakingMetrics] = useState<StakingMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -53,10 +43,6 @@ export default function Home() {
         // Fetch recent transactions
         const transactionsResponse = await axios.get('http://localhost:8000/transactions/recent');
         setTransactions(transactionsResponse.data.transactions || []);
-        
-        // Fetch pipeline status
-        const statusResponse = await axios.get('http://localhost:8000/pipeline/status');
-        setPipelineStatus(statusResponse.data.status || null);
         
         // Fetch staking metrics
         try {
