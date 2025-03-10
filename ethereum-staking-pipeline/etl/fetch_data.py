@@ -8,7 +8,7 @@ load_dotenv()
 
 API_KEY = os.getenv("ETHERSCAN_API_KEY")
 
-# Ethereum 2.0 Deposit Contract - This is where all ETH staking happens
+# Ethereum 2.0 Beacon Deposit Contract - This is where all ETH staking happens
 ETH2_DEPOSIT_CONTRACT = "0x00000000219ab540356cBB839Cbe05303d7705Fa"
 
 def fetch_staking_data(page=1, limit=10, sort_order="desc"):
