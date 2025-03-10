@@ -216,39 +216,38 @@ export default function Home() {
         </div>
       ) : (
         <>
-          {/* Staking Metrics Section - ETH Staked in Last Hour */}
+          {/* Staking Metrics Section - Top metrics side by side */}
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">ETH Staked in Last Hour</h2>
-            <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-              <div className="flex items-center justify-center">
-                <div className="text-center">
-                  <span className="text-5xl font-bold text-blue-700">
-                    {/* Debug: Show raw value and formatted value */}
-                    {stakingMetrics ? (
-                      formatNumber(stakingMetrics.TOTAL_ETH_LAST_HOUR || '0')
-                    ) : '0.0000'}
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Staking Metrics</h2>
+            
+            {/* Grid for side-by-side metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* ETH Staked in Last Hour */}
+              <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                <h3 className="text-lg font-medium text-gray-600 mb-2">ETH Staked in Last Hour</h3>
+                <div className="flex items-center">
+                  <span className="text-4xl font-bold text-blue-700">
+                    {stakingMetrics ? stakingMetrics.TOTAL_ETH_LAST_HOUR || '0' : '0'}
                   </span>
-                  <span className="text-2xl ml-2 text-gray-600">ETH</span>
+                  <span className="text-xl ml-2 text-gray-600">ETH</span>
                 </div>
               </div>
-            </div>
-            <div className="text-xs text-gray-500 mt-2 text-right">
-              Last updated: {stakingMetrics ? formatTimestamp(stakingMetrics.CALCULATED_AT) : new Date().toLocaleString()}
-            </div>
-          </div>
-          
-          {/* Transactions in Last Hour - MOVED HERE */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 text-black">Transactions in Last Hour</h2>
-            <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-              <div className="flex items-center justify-center">
-                <div className="text-center">
+
+              {/* Transactions in Last Hour */}
+              <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                <h3 className="text-lg font-medium text-gray-600 mb-2">Transactions in Last Hour</h3>
+                <div className="flex items-center">
                   <span className="text-4xl font-bold text-blue-700">
                     {stakingMetrics ? stakingMetrics.TOTAL_TXS_LAST_HOUR || '0' : '0'}
                   </span>
                   <span className="text-xl ml-2 text-gray-600">Transactions</span>
                 </div>
               </div>
+            </div>
+            
+            {/* Last updated timestamp */}
+            <div className="text-xs text-gray-500 mt-2 text-right">
+              Last updated: {stakingMetrics ? formatTimestamp(stakingMetrics.CALCULATED_AT) : new Date().toLocaleString()}
             </div>
           </div>
           
