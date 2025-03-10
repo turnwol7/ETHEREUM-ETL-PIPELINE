@@ -1,22 +1,9 @@
-# ETHEREUM VALIDATOR DATA ETL PIPELINE  
+# ETL
 
-This blockchain ETL pipeline displays recent transaction data and metrics for the official ETH2 validator contract address.  
+This directory holds our ETL logic. We fetch, transform and load to Snowflake here.  
 
-This is a learning project that uses.
-- Python  
-- Snowflake  
-- SQL  
-- DBT  
-- Dagster  
-- Next.js  
+You can run the scripts manually to test CSV outputs. But the main upload script in ./upload_script.sh does everything for us.
 
-We have a number of servers to run to see data.
+To run the dagster_pipeline.py we need to boot up Dagster with:  
+```dagster dev -f dagster_pipeline.py -p 4000```  
 
-- Metrics API  
-uvicorn api:app  
-
-- Frontend  
-npm run dev  
-
-- Dagster UI  
-dagster dev -f dagster_pipeline.py -p 4000  

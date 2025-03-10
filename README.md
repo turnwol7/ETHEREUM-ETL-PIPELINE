@@ -29,6 +29,10 @@ Snowflake Account
 
 ## Usefull commands to get running  
 
+Manual Upload Script:  
+Run in root:  
+```./upload_script.sh```
+
 API Server:  
 ```uvicorn api:app```  
 
