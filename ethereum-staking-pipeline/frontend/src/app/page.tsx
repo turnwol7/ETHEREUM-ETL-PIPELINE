@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+// import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // Define TypeScript interfaces for your data
 interface Transaction {
@@ -261,43 +261,20 @@ export default function Home() {
               <p>Loading...</p>
             ) : (
               <div>
-                <p>Status: <span className={pipelineStatus?.status === 'active' ? 'text-green-600' : 'text-red-600'}>
-                  {pipelineStatus?.status || 'Active'}
-                </span></p>
+                <p>Status: 
+                  <span className={
+                    pipelineStatus?.status === 'active' || 
+                    pipelineStatus?.status === 'Active' ? 
+                    'text-green-600' : 'text-red-600'
+                  }>
+                    {(pipelineStatus?.status === 'active' || 
+                      pipelineStatus?.status === 'Active') ? 
+                      'Active' : 'Not Active'}
+                  </span>
+                </p>
                 <div>
                   <p>Transactions Processed: <span className="font-medium">{pipelineStatus?.total_transactions || '10'}</span></p>
                 </div>
-              </div>
-            )}
-          </div>
-          
-          {/* Hourly Stats Chart */}
-          <div className="mb-8 text-black">
-            <h2 className="text-xl font-semibold mb-4">Daily ETH Staking (Last 7 Days)</h2>
-            {loading ? (
-              <p>Loading chart...</p>
-            ) : (
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={[
-                    { day: 'Monday', ethStaked: 96, transactions: 3 },
-                    { day: 'Tuesday', ethStaked: 64, transactions: 2 },
-                    { day: 'Wednesday', ethStaked: 128, transactions: 4 },
-                    { day: 'Thursday', ethStaked: 32, transactions: 1 },
-                    { day: 'Friday', ethStaked: 64, transactions: 2 },
-                    { day: 'Saturday', ethStaked: 96, transactions: 3 },
-                    { day: 'Sunday', ethStaked: 160, transactions: 5 }
-                  ]}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="day" />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <Tooltip />
-                    <Legend />
-                    <Line yAxisId="left" type="monotone" dataKey="ethStaked" stroke="#82ca9d" name="ETH Staked" />
-                    <Line yAxisId="right" type="monotone" dataKey="transactions" stroke="#8884d8" name="Transactions" />
-                  </LineChart>
-                </ResponsiveContainer>
               </div>
             )}
           </div>
