@@ -17,6 +17,16 @@ A complete data pipeline for Ethereum staking data using modern data stack techn
 - `/api`: FastAPI backend for serving data
 - `/frontend`: Next.js frontend for visualization
 
-## Setup Instructions
+## Usefull commands to get running  
+
+API Server:  
+```uvicorn api:app```  
+
+Frontend Server:  
+```npm run dev```  
+
+Dagster Server:  
+Run in the etl directory  
+```dagster dev -f dagster_pipeline.py -p 4000```  
 
 See the README in each directory for specific setup instructions.
