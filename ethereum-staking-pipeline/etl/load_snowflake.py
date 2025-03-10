@@ -209,6 +209,10 @@ def upload_transactions_to_snowflake(conn, df):
         print(f"Added {new_records} new records to ETH_STAKING_TRANSACTIONS")
         print(f"Total records in ETH_STAKING_TRANSACTIONS: {count_after}")
         
+        # Record the pipeline run at the end
+        record_count = len(df)
+        record_pipeline_run(conn, "SUCCESS", record_count)
+        
         return True
     
     except Exception as e:
@@ -249,29 +253,36 @@ def upload_daily_stats_to_snowflake(conn, df):
         print(f"Error uploading daily statistics: {e}")
         return False
 
-def record_pipeline_run(conn, status="SUCCESS", details=None):
+def record_pipeline_run(conn, status="SUCCESS", records_processed=0):
     """Record a pipeline run in the PIPELINE_RUNS table"""
-    if not conn:
-        return False
-    
     try:
         cursor = conn.cursor()
         
-        # Get the current timestamp
-        cursor.execute("SELECT CURRENT_TIMESTAMP()")
-        timestamp = cursor.fetchone()[0]
+        # Create the table if it doesn't exist with VARCHAR for timestamp
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS PIPELINE_RUNS (
+                run_id INT AUTOINCREMENT, 
+                run_time VARCHAR(30),  
+                status VARCHAR(50),
+                records_processed INT
+            )
+        """)
         
-        # Insert pipeline run record
-        cursor.execute(
-            "INSERT INTO PIPELINE_RUNS (RUN_TIMESTAMP, STATUS, DETAILS) VALUES (%s, %s, %s)",
-            (timestamp, status, details or "ETL pipeline run completed")
+        # Insert with formatted timestamp string
+        cursor.execute("""
+            INSERT INTO PIPELINE_RUNS (run_time, status, records_processed) 
+            VALUES (TO_VARCHAR(CURRENT_TIMESTAMP(), 'YYYY-MM-DD HH24:MI:SS'), %s, %s)
+            """, 
+            (status, records_processed)
         )
         
-        print(f"Recorded pipeline run with status: {status}")
-        return True
+        # Make sure to commit the transaction
+        conn.commit()
+        
+        print(f"Pipeline run recorded: status={status}, records={records_processed}")
     except Exception as e:
         print(f"Error recording pipeline run: {e}")
-        return False
+        # Don't let this error stop the rest of the process
 
 def main():
     """Main function to load data into Snowflake"""
@@ -321,30 +332,6 @@ def main():
         # Upload daily statistics to Snowflake
         print("Uploading daily statistics to Snowflake...")
         upload_daily_stats_to_snowflake(conn, stats_df)
-    
-    # Record the pipeline run
-    try:
-        # Create the PIPELINE_RUNS table if it doesn't exist
-        cursor = conn.cursor()
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS PIPELINE_RUNS (
-            RUN_ID NUMBER AUTOINCREMENT PRIMARY KEY,
-            RUN_TIME TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
-            RECORDS_PROCESSED NUMBER
-        )
-        """)
-        
-        # Use the total_records variable
-        total_records = len(transactions_df) if 'transactions_df' in locals() else 0
-        
-        # Insert into the table with the correct column name (RUN_TIME, not TIMESTAMP)
-        cursor.execute("""
-        INSERT INTO PIPELINE_RUNS (RUN_TIME, RECORDS_PROCESSED)
-        VALUES (CURRENT_TIMESTAMP(), %s)
-        """, (total_records,))
-        print(f"Recorded pipeline run with {total_records} records processed")
-    except Exception as e:
-        print(f"Error recording pipeline run: {e}")
     
     # Close connection
     conn.close()
