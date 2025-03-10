@@ -13,14 +13,6 @@ interface Transaction {
   GAS_COST_ETH: string;
 }
 
-interface HourlyStat {
-  HOUR: string;
-  NUM_TRANSACTIONS: string;
-  TOTAL_ETH: string;
-  AVG_ETH: string;
-  TOTAL_GAS_COST: string;
-}
-
 // New interface for staking metrics
 interface StakingMetrics {
   TOTAL_ETH_LAST_24H: string;
@@ -47,7 +39,6 @@ interface PipelineStatus {
 
 export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [hourlyStats, setHourlyStats] = useState<HourlyStat[]>([]);
   const [pipelineStatus, setPipelineStatus] = useState<PipelineStatus | null>(null);
   const [stakingMetrics, setStakingMetrics] = useState<StakingMetrics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -60,25 +51,16 @@ export default function Home() {
         
         // Fetch recent transactions
         const transactionsResponse = await axios.get('http://localhost:8000/transactions/recent');
-        console.log('Transactions response:', transactionsResponse.data);
         setTransactions(transactionsResponse.data.transactions || []);
-        
-        // Fetch hourly stats
-        const hourlyStatsResponse = await axios.get('http://localhost:8000/stats/hourly');
-        console.log('Hourly stats response:', hourlyStatsResponse.data);
-        setHourlyStats(hourlyStatsResponse.data.hourly_stats || []);
         
         // Fetch pipeline status
         const statusResponse = await axios.get('http://localhost:8000/pipeline/status');
-        console.log('Status response:', statusResponse.data);
         setPipelineStatus(statusResponse.data.status || null);
         
         // Fetch staking metrics
         try {
           const metricsResponse = await axios.get('http://localhost:8000/metrics/staking');
-          console.log('Metrics response:', metricsResponse.data);
-          // Debug: Log the specific TOTAL_ETH_LAST_HOUR value
-          console.log('TOTAL_ETH_LAST_HOUR from API:', metricsResponse.data.metrics?.TOTAL_ETH_LAST_HOUR);
+          
           
           // Ensure we have valid metrics data
           if (metricsResponse.data && metricsResponse.data.metrics) {
@@ -236,12 +218,7 @@ export default function Home() {
                     <span className="text-5xl font-bold text-blue-700">
                       {/* Debug: Show raw value and formatted value */}
                       {stakingMetrics ? (
-                        <>
-                          {formatNumber(stakingMetrics.TOTAL_ETH_LAST_HOUR || '0')}
-                          <span className="text-xs block mt-1 text-gray-500">
-                            (Raw: {stakingMetrics.TOTAL_ETH_LAST_HOUR || 'null'})
-                          </span>
-                        </>
+                        formatNumber(stakingMetrics.TOTAL_ETH_LAST_HOUR || '0')
                       ) : '0.0000'}
                     </span>
                     <span className="text-2xl ml-2 text-gray-600">ETH</span>
@@ -314,30 +291,18 @@ export default function Home() {
             )}
           </div>
           
-          {/* Display hourly stats */}
-          <div className="mt-8 text-black">
-            <h2 className="text-xl font-semibold mb-4">Hourly Statistics</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-2">Hour</th>
-                    <th className="px-4 py-2">Transactions</th>
-                    <th className="px-4 py-2">Total ETH</th>
-                    <th className="px-4 py-2">Avg ETH</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {hourlyStats.map((stat, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
-                      <td className="px-4 py-2">{stat.HOUR}</td>
-                      <td className="px-4 py-2">{stat.NUM_TRANSACTIONS}</td>
-                      <td className="px-4 py-2">{formatNumber(stat.TOTAL_ETH)}</td>
-                      <td className="px-4 py-2">{formatNumber(stat.AVG_ETH)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {/* Hourly Transactions Metric */}
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold mb-4 text-black">Transactions in Last 24 Hours</h2>
+            <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+              <div className="flex items-center justify-center">
+                <div className="text-center">
+                  <span className="text-4xl font-bold text-blue-700">
+                    {stakingMetrics ? stakingMetrics.TOTAL_TXS_LAST_24H || '0' : '0'}
+                  </span>
+                  <span className="text-xl ml-2 text-gray-600">Transactions (24h)</span>
+                </div>
+              </div>
             </div>
           </div>
         </>
