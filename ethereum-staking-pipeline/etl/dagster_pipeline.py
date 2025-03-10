@@ -1,21 +1,32 @@
 from dagster import op, job, schedule, Definitions
 import subprocess
 import os
+import sys
 
 @op
 def run_upload_script():
     """Run the upload script that handles the entire ETL pipeline"""
-    # Get the path to the upload script (assuming it's in the root directory)
-    script_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "..", "upload_script.sh")
+    # Get absolute path to project root
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    script_path = os.path.join(project_root, "upload_script.sh")
+    
+    print(f"Project root: {project_root}")
+    print(f"Script path: {script_path}")
     
     # Make sure the script is executable
     subprocess.run(["chmod", "+x", script_path], check=True)
     
-    # Run the upload script
+    # Copy current environment and ensure we're using the same Python
+    env = os.environ.copy()
+    env["PYTHONPATH"] = project_root + ":" + env.get("PYTHONPATH", "")
+    
+    # Run the upload script from the project root directory
     result = subprocess.run(
-        ["/bin/bash", script_path],
+        ["/bin/zsh", script_path],  # Use zsh explicitly
+        cwd=project_root,  # Set working directory to project root
         capture_output=True,
-        text=True
+        text=True,
+        env=env  # Pass the modified environment
     )
     
     # Print the output
