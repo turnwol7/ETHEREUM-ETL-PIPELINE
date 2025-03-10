@@ -251,31 +251,6 @@ export default function Home() {
             </div>
           </div>
           
-          {/* Pipeline Status Section */}
-          <div className="bg-gray-100 p-4 rounded-lg mb-8 text-black">
-            <h2 className="text-xl font-semibold mb-2">ETL Pipeline Status</h2>
-            {loading ? (
-              <p>Loading...</p>
-            ) : (
-              <div>
-                <p>Status: 
-                  <span className={
-                    pipelineStatus?.status === 'active' || 
-                    pipelineStatus?.status === 'Active' ? 
-                    'text-green-600' : 'text-red-600'
-                  }>
-                    {(pipelineStatus?.status === 'active' || 
-                      pipelineStatus?.status === 'Active') ? 
-                      'Active' : 'Not Active'}
-                  </span>
-                </p>
-                <div>
-                  <p>Transactions Processed: <span className="font-medium">{pipelineStatus?.total_transactions || '10'}</span></p>
-                </div>
-              </div>
-            )}
-          </div>
-          
           {/* Recent Transactions */}
           <div>
             <h2 className="text-xl font-semibold mb-4 text-black">Recent Transactions</h2>
