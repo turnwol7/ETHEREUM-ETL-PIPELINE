@@ -28,9 +28,39 @@ def transform_data(df):
     df = df.copy()
     
     # Convert timestamps
-    if "timeStamp" in df.columns:
-        print("Converting timestamps...")
-        df["timestamp"] = pd.to_datetime(df["timeStamp"].astype(int), unit='s')
+    print("Converting timestamps...")
+    # Print raw timestamp for debugging
+    print(f"Raw timestamp value: {df['timeStamp'].iloc[0]}")
+    
+    # The timestamps in the CSV are already in the correct format: 2025-03-09 23:51:35
+    # We need to preserve this format rather than trying to convert from epoch time
+    if 'timeStamp' in df.columns:
+        # Check if the timestamp is already in string format
+        if df['timeStamp'].dtype == 'object':
+            # If it's already a string in datetime format, use it directly
+            df['timestamp'] = df['timeStamp']
+            print("Using existing timestamp string format")
+        else:
+            # If it's a numeric value, convert it to datetime
+            try:
+                # Convert nanoseconds to seconds if needed
+                if df['timeStamp'].iloc[0] > 1e15:
+                    df['timestamp'] = pd.to_datetime(df['timeStamp'].astype(float) / 1e9, unit='s')
+                    print("Converted nanosecond timestamps to datetime")
+                else:
+                    df['timestamp'] = pd.to_datetime(df['timeStamp'], unit='s')
+                    print("Converted epoch timestamps to datetime")
+            except Exception as e:
+                print(f"Error converting timestamps: {e}")
+                # Use the original timestamp as a fallback
+                df['timestamp'] = df['timeStamp']
+                print("Using original timestamp as fallback")
+    
+    # Print the converted timestamp
+    print(f"Converted timestamp: {df['timestamp'].iloc[0]}")
+    
+    # Ensure timestamp is in the correct format for Snowflake
+    print(f"Sample timestamp after conversion: {df['timestamp'].iloc[0]}")
     
     # Convert value from Wei to ETH
     if "value" in df.columns:

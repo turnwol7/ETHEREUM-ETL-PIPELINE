@@ -272,7 +272,7 @@ export default function Home() {
           </div>
           
           {/* Hourly Stats Chart */}
-          <div className="mb-8">
+          <div className="mb-8 text-black">
             <h2 className="text-xl font-semibold mb-4">Daily ETH Staking (Last 7 Days)</h2>
             {loading ? (
               <p>Loading chart...</p>
@@ -304,7 +304,7 @@ export default function Home() {
           
           {/* Recent Transactions */}
           <div>
-            <h2 className="text-xl font-semibold mb-4 text-white">Recent Transactions</h2>
+            <h2 className="text-xl font-semibold mb-4 text-black">Recent Transactions</h2>
             {loading ? (
               <p>Loading transactions...</p>
             ) : transactions.length > 0 ? (
@@ -335,6 +335,33 @@ export default function Home() {
             ) : (
               <p>No transactions available</p>
             )}
+          </div>
+          
+          {/* Display hourly stats */}
+          <div className="mt-8 text-black">
+            <h2 className="text-xl font-semibold mb-4">Hourly Statistics</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2">Hour</th>
+                    <th className="px-4 py-2">Transactions</th>
+                    <th className="px-4 py-2">Total ETH</th>
+                    <th className="px-4 py-2">Avg ETH</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {hourlyStats.map((stat, index) => (
+                    <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                      <td className="px-4 py-2">{stat.HOUR}</td>
+                      <td className="px-4 py-2">{stat.NUM_TRANSACTIONS}</td>
+                      <td className="px-4 py-2">{formatNumber(stat.TOTAL_ETH)}</td>
+                      <td className="px-4 py-2">{formatNumber(stat.AVG_ETH)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}

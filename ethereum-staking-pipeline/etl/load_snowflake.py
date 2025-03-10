@@ -34,14 +34,20 @@ def create_tables(conn):
     try:
         cursor = conn.cursor()
         
-        # Create table for transformed staking data
+        # Drop and recreate tables with correct schema
+        cursor.execute("DROP TABLE IF EXISTS ETH_STAKING_TRANSACTIONS;")
+        cursor.execute("DROP VIEW IF EXISTS RECENT_TRANSACTIONS;")
+        cursor.execute("DROP VIEW IF EXISTS HOURLY_STATS;")
+        cursor.execute("DROP VIEW IF EXISTS STAKING_METRICS;")
+        
+        # Create the main transactions table with proper timestamp format
         cursor.execute("""
-        CREATE TABLE IF NOT EXISTS ETH_STAKING_TRANSACTIONS (
+        CREATE TABLE ETH_STAKING_TRANSACTIONS (
             TRANSACTION_HASH VARCHAR(66) PRIMARY KEY,
             SENDER_ADDRESS VARCHAR(42),
             RECEIVER_ADDRESS VARCHAR(42),
             AMOUNT_ETH FLOAT,
-            TIMESTAMP TIMESTAMP_NTZ,
+            TIMESTAMP_STR VARCHAR(30),
             GAS_USED NUMBER,
             GAS_PRICE NUMBER,
             BLOCK_NUMBER NUMBER,
@@ -132,11 +138,24 @@ def upload_transactions_to_snowflake(conn, df):
         return False
     
     try:
-        # Convert date columns to proper format
-        if "timestamp" in df.columns and not pd.api.types.is_datetime64_any_dtype(df["timestamp"]):
-            df["timestamp"] = pd.to_datetime(df["timestamp"])
+        # Prepare data for upload
+        # Convert timestamp strings to datetime objects
+        if 'timestamp' in df.columns:
+            # Store timestamp as a string to avoid conversion issues
+            if pd.api.types.is_datetime64_any_dtype(df['timestamp']):
+                # Convert datetime to string
+                df['timestamp_str'] = df['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
+                print(f"Converted datetime to string: {df['timestamp_str'].iloc[0] if len(df) > 0 else 'No data'}")
+            else:
+                # If it's already a string, use it directly
+                df['timestamp_str'] = df['timestamp']
+                print(f"Using existing timestamp string: {df['timestamp_str'].iloc[0] if len(df) > 0 else 'No data'}")
+            
+            # Drop the original timestamp column
+            df = df.drop(columns=['timestamp'])
         
-        if "date" in df.columns and not pd.api.types.is_datetime64_any_dtype(df["date"]):
+        # Convert date strings to proper format if needed
+        if 'date' in df.columns:
             # Convert to datetime and then to string in YYYY-MM-DD format
             df["date"] = pd.to_datetime(df["date"]).dt.strftime('%Y-%m-%d')
         
@@ -153,13 +172,7 @@ def upload_transactions_to_snowflake(conn, df):
         cursor.execute("CREATE OR REPLACE TEMPORARY TABLE TEMP_TRANSACTIONS LIKE ETH_STAKING_TRANSACTIONS")
         
         # Write new data to temp table
-        success, num_chunks, num_rows, output = write_pandas(
-            conn=conn,
-            df=df,
-            table_name="TEMP_TRANSACTIONS",
-            database=os.getenv("SNOWFLAKE_DATABASE"),
-            schema=os.getenv("SNOWFLAKE_SCHEMA")
-        )
+        success, num_chunks, num_rows, output = write_pandas(conn, df, "TEMP_TRANSACTIONS")
         
         if not success:
             print("Failed to upload transaction data to temporary table")
@@ -177,12 +190,12 @@ def upload_transactions_to_snowflake(conn, df):
         WHEN NOT MATCHED THEN
             INSERT (
                 TRANSACTION_HASH, SENDER_ADDRESS, RECEIVER_ADDRESS, AMOUNT_ETH, 
-                TIMESTAMP, GAS_USED, GAS_PRICE, BLOCK_NUMBER, GAS_COST_ETH, 
+                TIMESTAMP_STR, GAS_USED, GAS_PRICE, BLOCK_NUMBER, GAS_COST_ETH, 
                 DATE, HOUR, DAY_OF_WEEK, MONTH, IS_STANDARD_STAKE
             )
             VALUES (
                 s.TRANSACTION_HASH, s.SENDER_ADDRESS, s.RECEIVER_ADDRESS, s.AMOUNT_ETH, 
-                s.TIMESTAMP, s.GAS_USED, s.GAS_PRICE, s.BLOCK_NUMBER, s.GAS_COST_ETH, 
+                s.TIMESTAMP_STR, s.GAS_USED, s.GAS_PRICE, s.BLOCK_NUMBER, s.GAS_COST_ETH, 
                 s.DATE, s.HOUR, s.DAY_OF_WEEK, s.MONTH, s.IS_STANDARD_STAKE
             )
         """)
@@ -221,17 +234,12 @@ def upload_daily_stats_to_snowflake(conn, df):
         for col in df.columns:
             print(f"  {col}: {df[col].dtype}")
         
-        # Write to Snowflake
-        success, num_chunks, num_rows, output = write_pandas(
-            conn=conn,
-            df=df,
-            table_name="ETH_STAKING_DAILY_STATS",
-            database=os.getenv("SNOWFLAKE_DATABASE"),
-            schema=os.getenv("SNOWFLAKE_SCHEMA")
-        )
+        # Let Snowflake infer the column types
+        success, num_chunks, num_rows, output = write_pandas(conn, df, "ETH_STAKING_DAILY_STATS")
         
         if success:
-            print(f"Successfully uploaded {num_rows} daily statistic records to Snowflake")
+            print(f"Successfully uploaded {num_rows} ETH_STAKING_DAILY_STATS records to Snowflake")
+            
             return True
         else:
             print("Failed to upload daily statistics to Snowflake")
@@ -315,7 +323,28 @@ def main():
         upload_daily_stats_to_snowflake(conn, stats_df)
     
     # Record the pipeline run
-    record_pipeline_run(conn)
+    try:
+        # Create the PIPELINE_RUNS table if it doesn't exist
+        cursor = conn.cursor()
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS PIPELINE_RUNS (
+            RUN_ID NUMBER AUTOINCREMENT PRIMARY KEY,
+            RUN_TIME TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+            RECORDS_PROCESSED NUMBER
+        )
+        """)
+        
+        # Use the total_records variable
+        total_records = len(transactions_df) if 'transactions_df' in locals() else 0
+        
+        # Insert into the table with the correct column name (RUN_TIME, not TIMESTAMP)
+        cursor.execute("""
+        INSERT INTO PIPELINE_RUNS (RUN_TIME, RECORDS_PROCESSED)
+        VALUES (CURRENT_TIMESTAMP(), %s)
+        """, (total_records,))
+        print(f"Recorded pipeline run with {total_records} records processed")
+    except Exception as e:
+        print(f"Error recording pipeline run: {e}")
     
     # Close connection
     conn.close()
