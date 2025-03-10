@@ -165,6 +165,7 @@ def get_staking_metrics():
                 TO_VARCHAR(TOTAL_TXS_ALL_TIME) as TOTAL_TXS_ALL_TIME,
                 TO_VARCHAR(AVG_ETH_ALL_TIME) as AVG_ETH_ALL_TIME,
                 TO_VARCHAR(TOTAL_ETH_LAST_HOUR) as TOTAL_ETH_LAST_HOUR,
+                TO_VARCHAR(TOTAL_TXS_LAST_HOUR) as TOTAL_TXS_LAST_HOUR,
                 TO_VARCHAR(CALCULATED_AT) as CALCULATED_AT
             FROM staking_metrics
         """)
@@ -191,6 +192,7 @@ def get_staking_metrics():
                 "TOTAL_TXS_ALL_TIME": "0",
                 "AVG_ETH_ALL_TIME": "0",
                 "TOTAL_ETH_LAST_HOUR": "0",
+                "TOTAL_TXS_LAST_HOUR": "0",
                 "CALCULATED_AT": str(datetime.now())
             }
             
@@ -209,6 +211,7 @@ def get_staking_metrics():
                 "TOTAL_ETH_ALL_TIME": "0",
                 "TOTAL_TXS_ALL_TIME": "0",
                 "AVG_ETH_ALL_TIME": "0",
+                "TOTAL_TXS_LAST_HOUR": "0",
                 "TOTAL_ETH_LAST_HOUR": "0",
                 "CALCULATED_AT": str(datetime.now())
             }

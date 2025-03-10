@@ -25,6 +25,7 @@ interface StakingMetrics {
   TOTAL_TXS_ALL_TIME: string;
   AVG_ETH_ALL_TIME: string;
   TOTAL_ETH_LAST_HOUR: string;
+  TOTAL_TXS_LAST_HOUR: string;
   CALCULATED_AT: string;
 }
 
@@ -76,6 +77,7 @@ export default function Home() {
               TOTAL_TXS_ALL_TIME: '0',
               AVG_ETH_ALL_TIME: '0',
               TOTAL_ETH_LAST_HOUR: '0',
+              TOTAL_TXS_LAST_HOUR: '0',
               CALCULATED_AT: new Date().toISOString(),
               ...metricsResponse.data.metrics
             };
@@ -93,6 +95,7 @@ export default function Home() {
               TOTAL_TXS_ALL_TIME: '0',
               AVG_ETH_ALL_TIME: '0',
               TOTAL_ETH_LAST_HOUR: '0',
+              TOTAL_TXS_LAST_HOUR: '0',
               CALCULATED_AT: new Date().toISOString()
             });
           }
@@ -110,6 +113,7 @@ export default function Home() {
             TOTAL_TXS_ALL_TIME: '0',
             AVG_ETH_ALL_TIME: '0',
             TOTAL_ETH_LAST_HOUR: '0',
+            TOTAL_TXS_LAST_HOUR: '0',
             CALCULATED_AT: new Date().toISOString()
           });
         }
@@ -137,6 +141,10 @@ export default function Home() {
     // No cleanup needed since we're not setting up an interval
     return () => {};
   }, []);
+
+  useEffect(() => {
+    console.log("Current metrics:", stakingMetrics);
+  }, [stakingMetrics]);
 
   // Add WebSocket support for real-time updates
   // useEffect(() => {
@@ -293,14 +301,14 @@ export default function Home() {
           
           {/* Hourly Transactions Metric */}
           <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4 text-black">Transactions in Last 24 Hours</h2>
+            <h2 className="text-xl font-semibold mb-4 text-black">Transactions in Last Hour</h2>
             <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
               <div className="flex items-center justify-center">
                 <div className="text-center">
                   <span className="text-4xl font-bold text-blue-700">
-                    {stakingMetrics ? stakingMetrics.TOTAL_TXS_LAST_24H || '0' : '0'}
+                    {stakingMetrics ? stakingMetrics.TOTAL_TXS_LAST_HOUR || '0' : '0'}
                   </span>
-                  <span className="text-xl ml-2 text-gray-600">Transactions (24h)</span>
+                  <span className="text-xl ml-2 text-gray-600">Transactions</span>
                 </div>
               </div>
             </div>
