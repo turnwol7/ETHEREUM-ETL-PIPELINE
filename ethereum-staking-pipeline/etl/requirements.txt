@@ -4,3 +4,4 @@ snowflake-connector-python[pandas]==3.5.0
 python-dotenv==1.0.0
 dagster==1.5.13
 dagster-webserver==1.5.13
+psutil==7.0.0
