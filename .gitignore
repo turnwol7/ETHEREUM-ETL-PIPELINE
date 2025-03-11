@@ -47,6 +47,3 @@ dagster_home/
 # Snowflake
 .snowflake/
 
-# Data files
-*.csv
-*.json
