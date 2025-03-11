@@ -228,10 +228,7 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Last updated timestamp */}
-            <div className="text-xs text-gray-500 mt-2 text-right">
-              Last updated: {stakingMetrics ? formatTimestamp(stakingMetrics.CALCULATED_AT) : new Date().toLocaleString()}
-            </div>
+            
           </div>
           
           {/* Recent Transactions */}
