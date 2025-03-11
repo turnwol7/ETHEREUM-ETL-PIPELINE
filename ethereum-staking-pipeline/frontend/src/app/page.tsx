@@ -47,7 +47,7 @@ export default function Home() {
         
         // Fetch staking metrics
         try {
-          const metricsResponse = await axios.get('http://localhost:8000/metrics/staking');
+          const metricsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/metrics/staking`);
           
           
           // Ensure we have valid metrics data
