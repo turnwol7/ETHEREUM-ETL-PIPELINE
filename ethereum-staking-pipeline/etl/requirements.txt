@@ -5,3 +5,4 @@ python-dotenv==1.0.0
 dagster==1.5.13
 dagster-webserver==1.5.13
 psutil==7.0.0
+dagit==1.10.4
