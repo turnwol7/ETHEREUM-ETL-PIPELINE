@@ -44,3 +44,16 @@ Run in the etl directory
 ```dagster dev -f dagster_pipeline.py -p 4000```  
 
 See the README in each directory for specific setup instructions.
+
+
+Render Deployment URLS
+
+https://ethereum-etl-pipeline-frontend.onrender.com/
+https://ethereum-etl-pipeline-dagster.onrender.com  
+https://ethereum-etl-pipeline-api.onrender.com/  
+
+Currently I dont pay for upgraded RAM VM's on Render so the front end uses Dagit config, while my dev environment runs the automation with Dagster locally to update the transactions.  The production Dagster version is to heavy for Render VM and crashes due to lack of RAM.
+
+if you go to the dagster endpoint in production you will see a stripped down version of dagster that wont run any orchestration.
+
+We can run the Dagster version locally to prove that this will work if we had more RAM.

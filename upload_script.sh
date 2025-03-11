@@ -12,8 +12,8 @@ if [ -d "venv" ]; then
 fi
 
 # Install required dependencies
-echo "📦 Installing required dependencies..."
-pip install "snowflake-connector-python[pandas]"
+# echo "📦 Installing required dependencies..."
+# pip install "snowflake-connector-python[pandas]"
 
 # Clean up duplicate CSV files in the ETL directory
 echo "🧹 Cleaning up duplicate CSV files..."
