@@ -85,8 +85,7 @@ export default function Home() {
               CALCULATED_AT: new Date().toISOString()
             });
           }
-        } catch (metricsError) {
-          console.error('Error fetching metrics:', metricsError);
+        } catch {
           // Set default metrics if there's an error
           setStakingMetrics({
             TOTAL_ETH_LAST_24H: '0',
@@ -105,8 +104,7 @@ export default function Home() {
         }
         
         setLoading(false);
-      } catch (err) {
-        console.error('Error fetching data:', err);
+      } catch {
         setError('Failed to fetch data. Please try again later.');
         setLoading(false);
       }
@@ -128,9 +126,7 @@ export default function Home() {
     return () => {};
   }, []);
 
-  useEffect(() => {
-    console.log("Current metrics:", stakingMetrics);
-  }, [stakingMetrics]);
+  
 
   // Add WebSocket support for real-time updates
   // useEffect(() => {
