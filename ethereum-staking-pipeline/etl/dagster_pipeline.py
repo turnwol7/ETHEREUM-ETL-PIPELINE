@@ -45,7 +45,7 @@ def eth_staking_pipeline():
 
 @schedule(
     job=eth_staking_pipeline,
-    cron_schedule="*/3 * * * *",  
+    cron_schedule="*/30 * * * *",  
     execution_timezone="UTC",
 )
 def eth_staking_schedule():
