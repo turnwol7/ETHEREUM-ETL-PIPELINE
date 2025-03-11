@@ -41,7 +41,8 @@ export default function Home() {
         setLoading(true);
         
         // Fetch recent transactions
-        const transactionsResponse = await axios.get('http://localhost:8000/transactions/recent');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const transactionsResponse = await axios.get(`${apiUrl}/transactions/recent`);
         setTransactions(transactionsResponse.data.transactions || []);
         
         // Fetch staking metrics
