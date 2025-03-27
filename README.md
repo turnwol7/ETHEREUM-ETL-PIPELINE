@@ -1,6 +1,18 @@
-# Ethereum Staking Pipeline
+# Ethereum Staking Pipeline Overview
 
-A complete data pipeline for Ethereum staking data using modern data stack technologies.  
+This pipeline does this:
+
+- Fetch current chain data from etherscan API  
+- ETL pipeline runs data to Snowflake  
+- DBT runs models on warehouse data to metric view tables  
+- FastAPI points to these metric tables in Snowflake  
+- Next.js front end fetches data from our API
+
+This is a blockchain data pipeline that runs an ETL pipeline to process recent transactions on the beacon chain staking contract address to a fullstack front end. This is an experiment for a Junior Data Engineer interview loop. Here is the deployed link example.
+
+https://ethereum-etl-pipeline-frontend.onrender.com/ 
+
+Tools: Python, SQL, Snowflake, DBT, Dagster
 
 ## Ethereum Beacon Chain Contract Address  
 
@@ -15,7 +27,7 @@ This is the contract that we are pulling data from
 - **API**: FastAPI for serving data to the frontend
 - **Frontend**: Next.js dashboard deployed on Vercel
 
-## Components
+## Directories
 
 - `/etl`: ETL pipeline code and Dagster orchestration
 - `/dbt`: dbt models for data transformation in Snowflake
@@ -23,6 +35,8 @@ This is the contract that we are pulling data from
 - `/frontend`: Next.js frontend for visualization  
 
 ## Services
+
+You'll need your own API's and accounts for:
 
 Etherscan API  
 Snowflake Account  
@@ -43,4 +57,12 @@ Dagster Server:
 Run in the etl directory  
 ```dagster dev -f dagster_pipeline.py -p 4000```  
 
+Currently my deployment service is on the free tier, so you must run the orchestration from your dev environment on the dev-fix branch.
+
+The main branch is deployed but the orchestration is too heavy for my VM's on Render, so just run dagster locally to run the 3 minute schedule.
+
 See the README in each directory for specific setup instructions.
+
+Render Deployment here:
+
+https://ethereum-etl-pipeline-frontend.onrender.com/ 
