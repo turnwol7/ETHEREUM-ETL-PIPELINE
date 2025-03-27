@@ -1,6 +1,16 @@
-# Ethereum Staking Pipeline
+# Ethereum Staking Pipeline Overview
 
-This is a blockchain data pipeline that runs an ETL pipeline to process recent transactions on the beacon chain staking contract address to a fullstack front end here. This is an experiment for a Junior Data Engineer interview loop.
+<img width="1280" alt="Screen Shot 2025-03-27 at 2 45 13 PM" src="https://github.com/user-attachments/assets/6e782695-13cf-4575-9b9f-d0578b762806" />
+
+This pipeline does this:
+
+- Fetch current chain data from etherscan API  
+- ETL pipeline runs data to Snowflake  
+- DBT runs models on warehouse data to metric view tables  
+- FastAPI points to these metric tables in Snowflake  
+- Next.js front end fetches data from our API
+
+This is a blockchain data pipeline that runs an ETL pipeline to process recent transactions on the beacon chain staking contract address to a fullstack front end. This is an experiment for a Junior Data Engineer interview loop. Here is the deployed link example.
 
 https://ethereum-etl-pipeline-frontend.onrender.com/ 
 
@@ -51,10 +61,10 @@ Run in the etl directory
 
 Currently my deployment service is on the free tier, so you must run the orchestration from your dev environment on the dev-fix branch.
 
-The main branch is deployed but the orchestration is too heavy for my VM's so just run dagster locally to run the 3 minute schedule.
+The main branch is deployed but the orchestration is too heavy for my VM's on Render, so just run dagster locally to run the 3 minute schedule.
 
 See the README in each directory for specific setup instructions.
 
-Render Deployment
+Render Deployment here:
 
 https://ethereum-etl-pipeline-frontend.onrender.com/ 
