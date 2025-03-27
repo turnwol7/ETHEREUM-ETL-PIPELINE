@@ -1,0 +1,147 @@
+Project root: /Users/JustinBishop/Documents/staking-data-pipeline
+Script path: /Users/JustinBishop/Documents/staking-data-pipeline/upload_script.sh
+Script output: 🚀 Starting Ethereum Staking ETL Pipeline
+📦 Activating virtual environment...
+🧹 Cleaning up duplicate CSV files...
+File staking_transactions.csv not found in ETL directory
+File transformed_staking_data.csv not found in ETL directory
+File daily_staking_stats.csv not found in ETL directory
+Backup completed. Files saved to /Users/JustinBishop/Documents/staking-data-pipeline/ethereum-staking-pipeline/etl/backup_20250326_111205
+The ETL pipeline will now use the CSV files from the root directory
+📥 Fetching data from Etherscan...
+Fetching recent ETH2 staking transactions...
+Successfully fetched 10 transactions
+
+Latest transaction:
+Hash: 0x99e0f250616267ffc56829b0cbe98b88a741452e63b47e1d8c59c80165d56119
+From: 0x80c83c8463501a9fefffda1013d688aacc418900
+Value: 32.0 ETH
+Date: 2025-03-26 11:06:35
+Days Ago: 0 days
+Block: 22131570
+
+Recent transactions:
+2. 2025-03-26 10:55:35 (0 days) - 32.0 ETH
+3. 2025-03-26 10:35:11 (0 days) - 32.0 ETH
+4. 2025-03-26 09:32:23 (0 days) - 32.0 ETH
+5. 2025-03-26 08:07:59 (0 days) - 32.0 ETH
+Saved 10 transactions to staking_transactions.csv
+Saved 10 transactions to root directory: /Users/JustinBishop/Documents/staking-data-pipeline/staking_transactions.csv
+
+Oldest transaction in this batch:
+Hash: 0xde11be6fc0307fb46efa44cd377626aae2d6129c524437a196f06a606811c4e6
+From: 0x5a436013386f7d60b965e8ece3113036aa3cf212
+Value: 32.0 ETH
+Date: 2025-03-26 06:48:23
+Days Ago: 0 days
+Block: 22130281
+📄 Verifying fetched data...
+blockNumber,blockHash,timeStamp,hash,nonce,transactionIndex,from,to,value,gas,gasPrice,input,methodId,functionName,contractAddress,cumulativeGasUsed,txreceipt_status,gasUsed,confirmations,isError
+22131570,0x581a803366f7fb8f6dfa4b8f588418f62bdc60b6694ae3f0f9e1b6b3ca7f41e5,1742997995,0x99e0f250616267ffc56829b0cbe98b88a741452e63b47e1d8c59c80165d56119,795,176,0x80c83c8463501a9fefffda1013d688aacc418900,0x00000000219ab540356cbb839cbe05303d7705fa,32000000000000000000,91617,1797596599,0x22895118000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000120f45cf71cce4a7efcfc4eed4f9c3dd71ba6691cecf9ea3446f7d12170868390ae0000000000000000000000000000000000000000000000000000000000000030b4d322ff618e4bf49a4c878e92b0f610e9b2d74419075816e4e71ccd67f4be4e11686cd614e991eb7c5ed3102517da6a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020010000000000000000000000b36e9d2786005235ba9036585ecd4c40174555f30000000000000000000000000000000000000000000000000000000000000060b49370a809b560eadb2ffaa51cf8dd0c3a67b1ce564a596f4d21e1dffc7fea05b06d307c9b00638c1743674d15a994aa18a3079749e7c4ad6e8a36ef9a39581ae78cdd413974b5e460a328a94df83578195cb256899e446f62dc6fdd1278dcc7,0x22895118,"deposit(bytes pubkey, bytes withdrawal_credentials, bytes signature, bytes32 deposit_data_root)",,19049263,1,56454,27,0
+22131515,0x84f3a067c408926b055a7deff578bafeaf517327817f30fd24eeb42c6c296921,1742997335,0xb9fc42514a6ed1b601003ca2f6a4420b031a070b8361aac88e4395c1c128a819,398,48,0x3fb4d58a04acec7c4a5a0c57e43a54504e4f2e4b,0x00000000219ab540356cbb839cbe05303d7705fa,32000000000000000000,81445,3988983160,0x22895118000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000012002eae99b9fb562f2acf1d655abbf924dd37bf4a61b11c9362ca109054b4788fa0000000000000000000000000000000000000000000000000000000000000030960bd1319bc33dd8df2c9328e1207da327fd44863ba2e189374375a702a921a016c8c4acf1f4278e0263d1e713727157000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020010000000000000000000000283fee92706a99e2fb04c81e2ec83ed28d3aa9960000000000000000000000000000000000000000000000000000000000000060ae1047a96d1be9f0787301f3f89380092fa641e080bc34f0fbb9ced745ab6af497a284b3d6410288f7eccb33ceebbad212b5c435856d691d52a82bd1bef01f3af4112ad85e7cb5858220928d19c7b57fcc65a6aefdf0c9e70a3fb9c9e2cd2455,0x22895118,"deposit(bytes pubkey, bytes withdrawal_credentials, bytes signature, bytes32 deposit_data_root)",,3690330,1,50526,82,0
+🔄 Transforming data...
+Loading data from staking_transactions.csv...
+Converting timestamps...
+Raw timestamp value: 1742997995
+Converted epoch timestamps to datetime
+Converted timestamp: 2025-03-26 14:06:35
+Sample timestamp after conversion: 2025-03-26 14:06:35
+Converting Wei to ETH...
+Renaming columns...
+Selecting 8 relevant columns...
+Adding derived columns...
+
+Transformed data preview:
+                                    transaction_hash  ... is_standard_stake
+0  0x99e0f250616267ffc56829b0cbe98b88a741452e63b4...  ...              True
+1  0xb9fc42514a6ed1b601003ca2f6a4420b031a070b8361...  ...              True
+2  0xeeb09410707ca85234ee12c3368f7c11bb495ffb629d...  ...              True
+3  0x354d1214c8ce9fa2ee129ec9a0b8d6f233ccbe542918...  ...              True
+4  0x0b9a887cc859f61dfdacebc1fef5ad4685e362910425...  ...              True
+
+[5 rows x 14 columns]
+Creating daily summary statistics...
+
+Daily summary preview:
+         date  num_transactions  ...  num_standard_stakes  pct_standard_stakes
+0  2025-03-26                10  ...                   10                100.0
+
+[1 rows x 10 columns]
+Saved transformed data with 10 rows to transformed_staking_data.csv
+Saved transformed data with 10 rows to root directory: /Users/JustinBishop/Documents/staking-data-pipeline/transformed_staking_data.csv
+Saved daily summary with 1 rows to daily_staking_stats.csv
+Saved daily summary with 1 rows to root directory: /Users/JustinBishop/Documents/staking-data-pipeline/daily_staking_stats.csv
+Transformation complete!
+📄 Verifying transformed data...
+transaction_hash,sender_address,receiver_address,amount_eth,timestamp,gas_used,gas_price,block_number,gas_cost_eth,date,hour,day_of_week,month,is_standard_stake
+0x99e0f250616267ffc56829b0cbe98b88a741452e63b47e1d8c59c80165d56119,0x80c83c8463501a9fefffda1013d688aacc418900,0x00000000219ab540356cbb839cbe05303d7705fa,32.0,2025-03-26 14:06:35,56454,1797596599,22131570,0.000101481518399946,2025-03-26,14,Wednesday,March,True
+0xb9fc42514a6ed1b601003ca2f6a4420b031a070b8361aac88e4395c1c128a819,0x3fb4d58a04acec7c4a5a0c57e43a54504e4f2e4b,0x00000000219ab540356cbb839cbe05303d7705fa,32.0,2025-03-26 13:55:35,50526,3988983160,22131515,0.00020154736314216,2025-03-26,13,Wednesday,March,True
+📤 Loading data to Snowflake...
+Connected to Snowflake successfully!
+Tables created successfully!
+Successfully truncated existing tables
+Loading transformed transaction data...
+Loading transformed_staking_data.csv from current directory
+Uploading transaction data to Snowflake...
+Using existing timestamp string: 2025-03-26 14:06:35
+Column data types:
+  TRANSACTION_HASH: object
+  SENDER_ADDRESS: object
+  RECEIVER_ADDRESS: object
+  AMOUNT_ETH: float64
+  GAS_USED: int64
+  GAS_PRICE: int64
+  BLOCK_NUMBER: int64
+  GAS_COST_ETH: float64
+  DATE: object
+  HOUR: int64
+  DAY_OF_WEEK: object
+  MONTH: object
+  IS_STANDARD_STAKE: bool
+  TIMESTAMP_STR: object
+Successfully processed 10 transaction records
+Added 10 new records to ETH_STAKING_TRANSACTIONS
+Total records in ETH_STAKING_TRANSACTIONS: 10
+Pipeline run recorded: status=SUCCESS, records=10
+Loading daily statistics data...
+Loading daily_staking_stats.csv from current directory
+Uploading daily statistics to Snowflake...
+Column data types:
+  DATE: object
+  NUM_TRANSACTIONS: int64
+  TOTAL_ETH_STAKED: float64
+  AVG_STAKE_SIZE: float64
+  MIN_STAKE_SIZE: float64
+  MAX_STAKE_SIZE: float64
+  TOTAL_GAS_COST: float64
+  AVG_GAS_COST: float64
+  NUM_STANDARD_STAKES: int64
+  PCT_STANDARD_STAKES: float64
+Successfully uploaded 1 ETH_STAKING_DAILY_STATS records to Snowflake
+Data loading to Snowflake complete!
+📊 Running dbt models...
+[0m14:12:19  Running with dbt=1.9.3
+[0m14:12:20  Registered adapter: snowflake=1.9.2
+[0m14:12:21  [[33mWARNING[0m]: Configuration paths exist in your dbt_project.yml file which do not apply to any resources.
+There are 1 unused configuration paths:
+- models.eth_staking.example
+[0m14:12:21  Found 3 models, 1 source, 474 macros
+[0m14:12:21  
+[0m14:12:21  Concurrency: 4 threads (target='dev')
+[0m14:12:21  
+[0m14:12:22  1 of 3 START sql view model PUBLIC.hourly_stats ................................ [RUN]
+[0m14:12:22  2 of 3 START sql view model PUBLIC.recent_transactions ......................... [RUN]
+[0m14:12:22  3 of 3 START sql view model PUBLIC.staking_metrics ............................. [RUN]
+[0m14:12:22  1 of 3 OK created sql view model PUBLIC.hourly_stats ........................... [[32mSUCCESS 1[0m in 0.45s]
+[0m14:12:23  2 of 3 OK created sql view model PUBLIC.recent_transactions .................... [[32mSUCCESS 1[0m in 0.82s]
+[0m14:12:23  3 of 3 OK created sql view model PUBLIC.staking_metrics ........................ [[32mSUCCESS 1[0m in 0.89s]
+[0m14:12:23  
+[0m14:12:23  Finished running 3 view models in 0 hours 0 minutes and 2.08 seconds (2.08s).
+[0m14:12:23  
+[0m14:12:23  [32mCompleted successfully[0m
+[0m14:12:23  
+[0m14:12:23  Done. PASS=3 WARN=0 ERROR=0 SKIP=0 TOTAL=3
+✅ ETL Pipeline completed successfully!
+Check your dashboard for updated data.
+🔄 Remember to refresh your frontend to see the latest data!
+
