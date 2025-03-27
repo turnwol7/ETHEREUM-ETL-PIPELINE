@@ -1,5 +1,7 @@
 # Ethereum Staking Pipeline Overview
 
+<img width="1280" alt="Screen Shot 2025-03-27 at 2 45 13 PM" src="https://github.com/user-attachments/assets/6e782695-13cf-4575-9b9f-d0578b762806" />
+
 This pipeline does this:
 
 - Fetch current chain data from etherscan API  
