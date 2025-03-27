@@ -1,6 +1,10 @@
 # Ethereum Staking Pipeline
 
-A complete data pipeline for Ethereum staking data using modern data stack technologies.  
+This is a blockchain data pipeline that runs an ETL pipeline to process recent transactions on the beacon chain staking contract address to a fullstack front end here. This is an experiment for a Junior Data Engineer interview loop.
+
+https://ethereum-etl-pipeline-frontend.onrender.com/ 
+
+Tools: Python, SQL, Snowflake, DBT, Dagster
 
 ## Ethereum Beacon Chain Contract Address  
 
@@ -15,7 +19,7 @@ This is the contract that we are pulling data from
 - **API**: FastAPI for serving data to the frontend
 - **Frontend**: Next.js dashboard deployed on Vercel
 
-## Components
+## Directories
 
 - `/etl`: ETL pipeline code and Dagster orchestration
 - `/dbt`: dbt models for data transformation in Snowflake
@@ -23,6 +27,8 @@ This is the contract that we are pulling data from
 - `/frontend`: Next.js frontend for visualization  
 
 ## Services
+
+You'll need your own API's and accounts for:
 
 Etherscan API  
 Snowflake Account  
@@ -43,17 +49,12 @@ Dagster Server:
 Run in the etl directory  
 ```dagster dev -f dagster_pipeline.py -p 4000```  
 
+Currently my deployment service is on the free tier, so you must run the orchestration from your dev environment on the dev-fix branch.
+
+The main branch is deployed but the orchestration is too heavy for my VM's so just run dagster locally to run the 3 minute schedule.
+
 See the README in each directory for specific setup instructions.
 
+Render Deployment
 
-Render Deployment URLS
-
-https://ethereum-etl-pipeline-frontend.onrender.com/
-https://ethereum-etl-pipeline-dagster.onrender.com  
-https://ethereum-etl-pipeline-api.onrender.com/  
-
-Currently I dont pay for upgraded RAM VM's on Render so the front end uses Dagit config, while my dev environment runs the automation with Dagster locally to update the transactions.  The production Dagster version is to heavy for Render VM and crashes due to lack of RAM.
-
-if you go to the dagster endpoint in production you will see a stripped down version of dagster that wont run any orchestration.
-
-We can run the Dagster version locally to prove that this will work if we had more RAM.
+https://ethereum-etl-pipeline-frontend.onrender.com/ 
