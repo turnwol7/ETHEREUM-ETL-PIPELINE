@@ -44,6 +44,28 @@ yarn-error.log*
 # Dagster
 dagster_home/
 
+**/profiles.yml
+**/.user.yml
+**/tmp*/
+**/backup_*/
+**/*.log
+**/compute_logs/
+
+# Dagster temporary files
+tmp*/
+**/tmp*/
+/tmp-*/ 
+
+ **/cache/
+ **/.cache/
 # Snowflake
 .snowflake/
 
+.vscode/
+.idea/
+*.swp
+*.swo
+
+build/
+dist/
+*.egg-info/
